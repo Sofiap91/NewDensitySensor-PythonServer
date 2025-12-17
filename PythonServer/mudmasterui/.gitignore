@@ -1,0 +1,21 @@
+################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+/MudMasterUI/__pycache__
+
+*.suo
+
+# Visual Studio 2015/2017 cache/options directory
+.vs/
+.vscode/
+
+*__pycache__
+# MudMasterUI/configFiles/

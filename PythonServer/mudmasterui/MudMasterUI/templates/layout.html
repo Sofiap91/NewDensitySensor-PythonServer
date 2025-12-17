@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Charset and viewport settings for responsive design -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Title of the page, using a variable for dynamic content -->
+    <title>{{ title }} - Mudmaster UI</title>
+
+    <!-- Stylesheets for different UI components -->
+    <link rel="stylesheet" type="text/css" href="/static/content/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="/static/content/site.css" />
+    <link rel="stylesheet" type="text/css" href="/static/content/all.css" />
+    <link rel="stylesheet" type="text/css" href="/static/content/Chart.css" />
+
+    <!-- Apple touch icon for iPhone home screen -->
+    <!-- Default icon (Apple's default size is 180x180px) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/images/img1.png">
+
+    <!-- For devices that need larger icons -->
+    <link rel="apple-touch-icon" sizes="152x152" href="/static/images/img1.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="/static/images/img1.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/static/images/img1.png">
+
+    <!-- Bootstrap CDN for additional styling -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- JavaScript file for modernizr (feature detection) -->
+    <script src="/static/scripts/modernizr-2.6.2.js"></script>
+
+    <style>
+        /* Apply bold to all text on the page */
+        body {
+            font-weight: bold;
+            height: 100%;
+        }
+
+        .navbar {
+            background-color: #4CAF50; /* Slightly darker green for better contrast */
+        }
+        
+        .navbar .nav-link {
+            color: white !important; /* Set navbar links to white */
+        }
+
+        .navbar .nav-link:hover {
+            color: #ddd !important; /* Slight hover effect */
+        }
+
+        .footer {
+            background-color: #4CAF50; /* Matching green footer */
+            
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .footer .text-light {
+            color: #f1f1f1 !important; /* White text for better readability */
+            font-size: 18px; /* Make footer text a little larger */
+        }
+        .main-content {
+            background-color: #f8f9fa; /* Set light background */
+            margin-bottom: 0; /* Remove any margin */
+            padding-bottom: 0; /* Remove any padding */
+        }
+    </style>
+</head>
+
+<body class="d-flex flex-column h-100">
+    <header>
+        <nav class="navbar navbar-expand-sm fixed-top px-4">
+            <!-- Title centered for larger screens -->
+            <div class="text-white d-none d-sm-block">
+                <h4 class="mb-0">RTDS - {{ title }}</h4>
+            </div>
+
+            <!-- Navbar toggler button for mobile views -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar content that collapses on mobile -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- Desktop menu items -->
+                <ul class="navbar-nav mx-auto d-none d-sm-flex">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('mountingSystemV2.mounting_system')}}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('vna.vna')}}">Live VNA Interface</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.measure')}}">Live Tailings Measurement</a>
+                    </li>
+                </ul>
+
+                <!-- Dropdown menu for mobile views -->
+                <ul class="navbar-nav mx-auto d-sm-none">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Menu
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ url_for('mountingSystemV2.mounting_system')}}">Home</a>
+                            <a class="dropdown-item" href="{{ url_for('vna.vna')}}">Live VNA Interface</a>
+                            <a class="dropdown-item" href="{{ url_for('main.measure')}}">Live Tailings Measurement</a>
+                        </div>
+                    </li>
+                </ul>
+
+                <!-- Right-hand side icons for status indicators -->
+                <div class="navbar-nav d-none d-sm-flex" style="min-width: 120px">
+                    <li class="nav-item my-auto">
+                        <!-- VNA connection status icon -->
+                        <span class="fas fa-chart-line mx-1 text-center align-middle" style="color: gray" id="vnaConnection" title=""></span>
+                    </li>
+                    <li class="nav-item my-auto">
+                        <!-- Mounting system connection status icon -->
+                        <span class="fas fa-cog mx-1 text-center align-middle" style="color: gray" id="mountingSystemConection" title=""></span>
+                    </li>
+                    <li class="nav-item my-auto">
+                        <!-- Teltonika connection status icon -->
+                        <span class="fas fa-map-marker-alt mx-1 text-center align-middle" style="color: gray" id="teltonikaConnection" title=""></span>
+                    </li>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="flex-shrink-0 mt-3 main-content">
+        <div class="container bg-light">
+            <!-- Placeholder for dynamic content -->
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="footer py-3 fixed-bottom">
+        <div class="container d-flex" style="width: 100%; justify-content: space-between;">
+            <!-- Footer text showing version and machine number -->
+            <div class="text-light" style="text-align: left; flex-grow: 1;">
+                <img src="/static/images/logoInverted.png" alt="Logo" style="max-height: 25px;"> <!-- Adjust image size as needed -->
+            </div>
+            <div class="text-light" style="text-align: right;">Mudmaster UI - Version: {{ config.VERSION }} | Machine: {{ config.CONFIG_MACHINE.machineNumber }}</div>
+        </div>
+    </footer>
+
+    <!-- JavaScript files for various functionalities -->
+    <script src="/static/scripts/jquery-3.6.0.min.js"></script>
+    <script src="/static/scripts/bootstrap.js"></script>
+    <script src="/static/scripts/respond.js"></script>
+    <script src="/static/scripts/Chart.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Setup EventSource to listen for system status updates
+            var source_status_indicators = new EventSource("{{ url_for('eventStreams.systemStatusIndicators')}}");
+
+            source_status_indicators.onmessage = function (event) {
+                var data = JSON.parse(event.data);
+
+                // Update UI based on received data
+                $("#errorIndicator").css('color', data.errorIndicator == 0 ? "#343a40" : "red")
+                                    .attr('title', data.errorIndicator == 0 ? "No Errors" : "Error");
+
+                $("#vnaConnection").css('color', data.vnaConnection == 0 ? "darkorange" : "#007BFF")
+                                   .attr('title', data.vnaConnection == 0 ? "VNA not connected" : "VNA connected");
+
+                $("#teltonikaConnection").css('color', data.teltonikaConnection == 0 ? "darkorange" : "#007BFF")
+                                         .attr('title', data.teltonikaConnection == 0 ? "Error Cant find Teltonika" : "Teltonika Connected");
+
+                if (data.mountingSystemConection == -1) {
+                    $("#mountingSystemConection").css('color', "darkorange")
+                                                  .attr('title', "Mounting system not connected");
+                } else if (data.mountingSystemConection == 1) {
+                    $("#mountingSystemConection").css('color', "red")
+                                                  .attr('title', "Mounting system error");
+                } else {
+                    $("#mountingSystemConection").css('color', "#007BFF")
+                                                  .attr('title', "Mounting system connected");
+                }
+            };
+        });
+    </script>
+
+    <!-- Setup AJAX with CSRF token for security -->
+    <script type="text/javascript">
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+    </script>
+
+    <!-- Placeholder for additional scripts -->
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>
