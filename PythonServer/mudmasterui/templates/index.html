@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h1 class="text-center mb-4">VNA Data Collection System</h1>
+        
+        <div class="text-center mb-4">
+            <button class="btn btn-start m-2" onclick="startMeasurements()">
+                <i class="fas fa-play"></i> Start Measurements
+            </button>
+            <button class="btn btn-stop m-2" onclick="stopMeasurements()">
+                <i class="fas fa-stop"></i> Stop Measurements
+            </button>
+            <button class="btn btn-status m-2" onclick="getStatus()">
+                <i class="fas fa-info-circle"></i> Get Status
+            </button>
+        </div>
+        
+        <div class="status-box">
+            <h3><i class="fas fa-tachometer-alt"></i> System Status</h3>
+            <pre id="status-content" class="mb-0">Click "Get Status" to check system status</pre>
+        </div>
+        
+        <div class="status-box">
+            <h3><i class="fas fa-comment-dots"></i> Messages</h3>
+            <div id="message-content" class="mb-0">Ready to start measurements</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function startMeasurements() {
+        fetch('/api/start-measurements', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                const msg = document.getElementById('message-content');
+                msg.className = data.status === 'success' ? 'message-success' : 'message-error';
+                msg.textContent = data.message;
+                getStatus();
+            })
+            .catch(error => {
+                document.getElementById('message-content').className = 'message-error';
+                document.getElementById('message-content').textContent = 'Error: ' + error;
+            });
+    }
+    
+    function stopMeasurements() {
+        fetch('/api/stop-measurements', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                const msg = document.getElementById('message-content');
+                msg.className = data.status === 'success' ? 'message-success' : 'message-error';
+                msg.textContent = data.message;
+                getStatus();
+            })
+            .catch(error => {
+                document.getElementById('message-content').className = 'message-error';
+                document.getElementById('message-content').textContent = 'Error: ' + error;
+            });
+    }
+    
+    function getStatus() {
+        fetch('/api/status')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('status-content').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('status-content').textContent = 'Error: ' + error;
+            });
+    }
+    
+    // Auto-refresh status every 5 seconds
+    setInterval(getStatus, 5000);
+</script>
+{% endblock %}

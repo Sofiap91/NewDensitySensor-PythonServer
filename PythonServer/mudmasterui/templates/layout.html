@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - VNA Data Collection</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        body {
+            font-weight: bold;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #4CAF50;
+        }
+        
+        .navbar .nav-link {
+            color: white !important;
+        }
+
+        .navbar .nav-link:hover {
+            color: #ddd !important;
+        }
+
+        .footer {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem 0;
+            margin-top: auto;
+        }
+
+        .main-content {
+            background-color: #f8f9fa;
+            flex: 1;
+            padding-top: 80px;
+            padding-bottom: 80px;
+        }
+        
+        .btn-start {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .btn-start:hover {
+            background-color: #45a049;
+            color: white;
+        }
+        
+        .btn-stop {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .btn-stop:hover {
+            background-color: #da190b;
+            color: white;
+        }
+        
+        .btn-status {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .btn-status:hover {
+            background-color: #0b7dda;
+            color: white;
+        }
+        
+        .status-box {
+            background-color: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .message-success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .message-error {
+            color: #f44336;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm fixed-top px-4">
+            <div class="text-white">
+                <h4 class="mb-0">VNA Data Collection - {{ title }}</h4>
+            </div>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="footer fixed-bottom">
+        <div class="container">
+            <div class="text-center text-white">
+                VNA Data Collection System - 2025
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>
