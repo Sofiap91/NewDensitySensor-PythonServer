@@ -1,5 +1,5 @@
 """
-Main Controller for VNA Data Collection System
+Main Controller.
 Manages measurement workflow, Arduino deployment, and VNA data retrieval
 """
 import threading
@@ -7,7 +7,8 @@ import time
 import requests
 import json
 from datetime import datetime
-from teltonika_interface import TeltonikaInterface
+from interfaces.teltonika_interface import TeltonikaInterface
+from interfaces.arduino_interface import ArduinoInterface
 
 
 class MainController:
@@ -22,6 +23,8 @@ class MainController:
         self.is_measuring = False
         self.measurement_thread = None
         self.arduino_deployed = False
+
+        self.arduino = ArduinoInterface()
 
 
     def start_measurements(self):
@@ -70,10 +73,19 @@ class MainController:
         Deploy Arduino to measurement position.
         """
         print("Deploying Arduino...")
-        # Placeholder for Arduino deployment logic
-        # This should communicate with the Arduino to extend the actuator
-        self.arduino_deployed = True
-        return True
+        try:
+            if self.arduino.connect():
+                print("Connected to Arduino. Extending actuator...")
+                result = self.arduino.fully_extend()
+                print(f"Arduino extend result: {result}")
+                self.arduino_deployed = (result == "success")
+                return self.arduino_deployed
+            else:
+                print("Failed to connect to Arduino.")
+                return False
+        except Exception as e:
+            print(f"Error during Arduino deployment: {e}")
+            return False
 
 
     def retract_arduino(self):
@@ -81,10 +93,15 @@ class MainController:
         Retract Arduino from measurement position.
         """
         print("Retracting Arduino...")
-        # Placeholder for Arduino retraction logic
-        # This should communicate with the Arduino to retract the actuator
-        self.arduino_deployed = False
-        return True
+        try:
+            result = self.arduino.fully_retract()
+            print(f"Arduino retract result: {result}")
+            self.arduino.disconnect()
+            self.arduino_deployed = False
+            return result == "success"
+        except Exception as e:
+            print(f"Error during Arduino retraction: {e}")
+            return False
 
 
     def _collect_vna_data(self):

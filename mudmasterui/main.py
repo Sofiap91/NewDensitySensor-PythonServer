@@ -4,9 +4,8 @@ Initializes Flask server and main controller for VNA data collection
 """
 from flask import Flask, render_template, jsonify, request
 import constants as const
-from teltonika_interface import TeltonikaInterface
-from vna_interface import VNAInterface
 from main_controller import MainController
+
 
 # Initialize Flask app
 app = Flask(__name__)
