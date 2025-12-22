@@ -9,22 +9,42 @@ import json
 from datetime import datetime
 from interfaces.teltonika_interface import TeltonikaInterface
 from interfaces.arduino_interface import ArduinoInterface
+from interfaces.vna_interface import VNAInterface
+from models.predictor import ModelPredictor
 
 
 class MainController:
-    def __init__(self, vna_server_url="http://127.0.0.1:5000"):
+    def __init__(self, vna_server_url="http://127.0.0.1:5000", cal_folder="Data/vna_cal", 
+                 enable_predictions=True, target_depths=[20, 50, 80, 100]):
         """
         Initialize the main controller.
 
         @param vna_server_url: URL of the VNA server (default: http://127.0.0.1:5000)
+        @param cal_folder: Path to VNA calibration files
+        @param enable_predictions: Whether to load models and make predictions
+        @param target_depths: List of depths (cm) to predict for
         """
         self.vna_server_url = vna_server_url
         self.teltonika = TeltonikaInterface()
         self.is_measuring = False
         self.measurement_thread = None
         self.arduino_deployed = False
+        self.enable_predictions = enable_predictions
+        self.target_depths = target_depths
 
         self.arduino = ArduinoInterface()
+        self.vna = VNAInterface(vna_server_url=vna_server_url, cal_folder=cal_folder)
+        
+        # Initialize predictor if enabled
+        self.predictor = None
+        if enable_predictions:
+            try:
+                self.predictor = ModelPredictor()
+                self.predictor.load_all_depths(target_depths)
+                print("✓ Models loaded and ready for predictions")
+            except Exception as e:
+                print(f"Warning: Could not load prediction models: {e}")
+                print("Running in data collection mode only")
 
 
     def start_measurements(self):
@@ -144,18 +164,88 @@ class MainController:
 
         # Get GPS coordinates from Teltonika
         gps_coords = self.teltonika.get_gps_coordinates()
+        
+        # Get actuator height from Arduino
+        actuator_height = None
+        if self.arduino_deployed:
+            try:
+                actuator_height = self.arduino.get_distance_to_ground()
+                print(f"Actuator height: {actuator_height}mm")
+            except Exception as e:
+                print(f"Warning: Could not get actuator height: {e}")
+        
+        # Process VNA measurement through interface
+        try:
+            vna_result = self.vna.process_measurement(vna_data, actuator_height_mm=actuator_height)
+            
+            if vna_result and self.predictor:
+                # Make predictions for all depths
+                predictions = self.predictor.predict_all_depths(vna_result)
+                
+                # Log results
+                measurement_data = {
+                    'timestamp': datetime.now().isoformat(),
+                    'gps': gps_coords,
+                    'actuator_height_mm': actuator_height,
+                    'predictions': predictions,
+                    'frequencies_ghz': vna_result['frequencies_ghz'].tolist()[:5],  # Sample of frequencies
+                }
+                
+                self._log_measurement(measurement_data)
+                
+                # Print summary
+                print("\nPredictions:")
+                for depth, pred in predictions.items():
+                    if 'shear_strength_kPa' in pred:
+                        print(f"  {depth}cm: {pred['shear_strength_kPa']:.2f} kPa")
+                
+            elif vna_result:
+                # No predictions, just log raw data
+                print("VNA data processed (no predictions available)")
+                
+        except Exception as e:
+            print(f"Error processing VNA data: {e}")
 
-        # For now, just print basic info
+        # Log GPS if available
         if gps_coords:
             print(f"GPS: Lat={gps_coords['latitude']}, Lon={gps_coords['longitude']}")
         else:
             print("GPS: No coordinates available")
+    
+    def _log_measurement(self, measurement_data):
+        """
+        Log measurement data to file
+        
+        @param measurement_data: Dictionary containing measurement info
+        """
+        from pathlib import Path
+        
+        log_folder = Path("Data/measurements")
+        log_folder.mkdir(parents=True, exist_ok=True)
+        
+        # Create daily log file
+        date_str = datetime.now().strftime("%Y%m%d")
+        log_file = log_folder / f"measurements_{date_str}.jsonl"
+        
+        # Append to log file (JSON Lines format)
+        with open(log_file, 'a') as f:
+            f.write(json.dumps(measurement_data) + '\n')
 
 
     def get_status(self):
         """Get the current status of the controller."""
-        return {
+        status = {
             "is_measuring": self.is_measuring,
             "arduino_deployed": self.arduino_deployed,
-            "vna_server": self.vna_server_url
+            "vna_server": self.vna_server_url,
+            "predictions_enabled": self.enable_predictions,
+            "target_depths": self.target_depths
         }
+        
+        if self.predictor:
+            status["loaded_models"] = {
+                depth: self.predictor.get_model_info(depth)
+                for depth in self.predictor.loaded_depths
+            }
+        
+        return status
